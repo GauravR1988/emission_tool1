@@ -1,109 +1,305 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>CO2 Emissions Play Tool</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
-        .container {
+        body {
+            background: #000;
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background: #f0f0f0;
+            min-height: 100vh;
         }
-        
-        .bubble {
-            position: relative;
-            border-radius: 50%;
-            margin: 20px;
+
+        .container {
+            width: 550px;
+            height: 270px;
+            padding: 15px;
+            background: #1a1a1a;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 10px;
+            gap: 5px;
+        }
+
+        .control-group {
+            background: linear-gradient(145deg, #2a2a2a, #333);
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: inset 0 0 10px rgba(255,255,255,0.1);
+            flex: 1;
+        }
+
+        .control-label {
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-shadow: 0 0 5px rgba(255,255,255,0.3);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 4px;
+        }
+
+        .control-btn {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+            color: #fff;
             cursor: pointer;
             transition: all 0.3s ease;
-            animation: pulse 2s infinite;
+            flex: 1;
+            font-size: 11px;
+            box-shadow: 
+                inset 0 0 5px rgba(255,255,255,0.1),
+                0 2px 5px rgba(0,0,0,0.2);
         }
-        
-        .bubble-content {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: white;
-            font-family: Arial, sans-serif;
+
+        .control-btn.active {
+            background: linear-gradient(145deg, #4a4a4a, #3a3a3a);
+            box-shadow: 
+                inset 0 0 10px rgba(255,255,255,0.2),
+                0 0 15px rgba(255,255,255,0.1);
+            transform: scale(1.05);
         }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.7; }
-            50% { transform: scale(1.05); opacity: 0.9; }
-            100% { transform: scale(1); opacity: 0.7; }
+
+        #graph {
+            height: 180px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            margin-bottom: 5px;
         }
-        
+
         .info-panel {
-            display: none;
-            position: absolute;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
-            max-width: 300px;
+            color: #00ff00;
+            font-size: 11px;
+            padding: 8px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .emissions-info {
+            flex: 1;
+            padding-right: 10px;
+        }
+
+        .trees-info {
+            flex: 1;
+            text-align: right;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="bubble" id="traffic" style="width: 150px; height: 150px; background: rgba(128,128,128,0.8);">
-            <div class="bubble-content">
-                <h3>Traffic</h3>
-                <p>30% CO₂</p>
+        <div class="controls">
+            <div class="control-group">
+                <div class="control-label">Traffic Level</div>
+                <div class="button-group">
+                    <button class="control-btn active" data-traffic="low">Low</button>
+                    <button class="control-btn" data-traffic="mid">Mid</button>
+                    <button class="control-btn" data-traffic="high">High</button>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="control-label">Weather</div>
+                <div class="button-group">
+                    <button class="control-btn active" data-weather="cool">Cool</button>
+                    <button class="control-btn" data-weather="moderate">Mod</button>
+                    <button class="control-btn" data-weather="hot">Hot</button>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="control-label">Vehicle Type</div>
+                <div class="button-group">
+                    <button class="control-btn active" data-vehicle="motorcycle">Moto</button>
+                    <button class="control-btn" data-vehicle="scooter">Scooter</button>
+                    <button class="control-btn" data-vehicle="van">Van</button>
+                </div>
             </div>
         </div>
-        
-        <div class="bubble" id="vehicle" style="width: 180px; height: 180px; background: rgba(128,128,128,0.9);">
-            <div class="bubble-content">
-                <h3>Vehicle</h3>
-                <p>59% CO₂</p>
-            </div>
-        </div>
-        
-        <div class="bubble" id="weather" style="width: 130px; height: 130px; background: rgba(128,128,128,0.7);">
-            <div class="bubble-content">
-                <h3>Weather</h3>
-                <p>25% CO₂</p>
-            </div>
+        <div id="graph"></div>
+        <div class="info-panel">
+            <div class="emissions-info" id="emissionsInfo"></div>
+            <div class="trees-info" id="treesInfo"></div>
         </div>
     </div>
-
-    <div id="info-panel" class="info-panel"></div>
-
     <script>
-        const bubbleData = {
-            traffic: {
-                title: "Traffic Impact",
-                details: "• Idle time increases fuel usage\n• Stop-and-go: +30% CO₂\n• Peak hours worsen impact"
-            },
-            vehicle: {
-                title: "Vehicle Impact",
-                details: "• Vans: 3-4x higher CO₂\n• Fleet composition crucial\n• EVs reduce emissions by 59%"
-            },
-            weather: {
-                title: "Weather Impact",
-                details: "• Extends delivery times\n• Increases fuel consumption\n• Adds 20-25% more CO₂"
-            }
+        let currentTraffic = 'low';
+        let currentWeather = 'cool';
+        let currentVehicle = 'motorcycle';
+
+        const trafficCurves = {
+            low: (x) => Math.pow(x, 1.2),
+            mid: (x) => Math.pow(x, 1.6),
+            high: (x) => Math.pow(x, 2)
         };
 
-        const bubbles = document.querySelectorAll('.bubble');
-        const infoPanel = document.getElementById('info-panel');
+        const weatherEffects = {
+            cool: (x) => x,
+            moderate: (x) => x * (1 + x/8),
+            hot: (x) => x * (1 + x/4)
+        };
 
-        bubbles.forEach(bubble => {
-            bubble.addEventListener('mouseover', (e) => {
-                const data = bubbleData[e.currentTarget.id];
-                infoPanel.innerHTML = `<h3>${data.title}</h3><p>${data.details}</p>`;
-                infoPanel.style.display = 'block';
-                infoPanel.style.left = e.pageX + 20 + 'px';
-                infoPanel.style.top = e.pageY + 'px';
-            });
+        const vehicleBaseEmissions = {
+            motorcycle: 75,
+            scooter: 100,
+            van: 200
+        };
 
-            bubble.addEventListener('mouseout', () => {
-                infoPanel.style.display = 'none';
+        function calculateEmissions(x) {
+            const baseEmission = vehicleBaseEmissions[currentVehicle];
+            const trafficEffect = trafficCurves[currentTraffic](x);
+            const weatherEffect = weatherEffects[currentWeather](x);
+            return baseEmission * (trafficEffect/5) * (weatherEffect/5);
+        }
+
+        function calculateTreeOffset(maxEmission) {
+            const CO2_PER_TREE_PER_YEAR = 22; // kg CO2 per tree per year
+            const OPERATION_HOURS_PER_DAY = 8;
+            const OPERATION_DAYS_PER_YEAR = 260; // Working days only
+
+            // Calculate lifetime CO2 for each period
+            const annualCO2 = maxEmission * OPERATION_HOURS_PER_DAY * OPERATION_DAYS_PER_YEAR;
+            const fiveYearTotal = annualCO2 * 5;    // Total CO2 over 5 years
+            const tenYearTotal = annualCO2 * 10;    // Total CO2 over 10 years
+            const twentyYearTotal = annualCO2 * 20;  // Total CO2 over 20 years
+
+            // Calculate trees needed for the total CO2 in each period
+            const treesFor5Years = Math.ceil(fiveYearTotal / (CO2_PER_TREE_PER_YEAR * 5));
+            const treesFor10Years = Math.ceil(tenYearTotal / (CO2_PER_TREE_PER_YEAR * 10));
+            const treesFor20Years = Math.ceil(twentyYearTotal / (CO2_PER_TREE_PER_YEAR * 20));
+
+            return {
+                peak: maxEmission.toFixed(1),
+                annual: Math.round(annualCO2),
+                totalCO2: {
+                    fiveYear: Math.round(fiveYearTotal),
+                    tenYear: Math.round(tenYearTotal),
+                    twentyYear: Math.round(twentyYearTotal)
+                },
+                trees: {
+                    fiveYear: treesFor5Years,
+                    tenYear: treesFor10Years,
+                    twentyYear: treesFor20Years
+                }
+            };
+        }
+
+        function updateGraph() {
+            const xValues = Array.from({length: 101}, (_, i) => i/10);
+            const yValues = xValues.map(x => calculateEmissions(x));
+            const maxEmission = Math.max(...yValues);
+
+            // Create vertical legend text
+            const legendText = [
+                `Traffic: ${currentTraffic.charAt(0).toUpperCase() + currentTraffic.slice(1)}`,
+                `Weather: ${currentWeather.charAt(0).toUpperCase() + currentWeather.slice(1)}`,
+                `Vehicle: ${currentVehicle.charAt(0).toUpperCase() + currentVehicle.slice(1)}`
+            ].join('<br>');
+
+            const trace = {
+                x: xValues,
+                y: yValues,
+                mode: 'lines',
+                line: {
+                    color: currentVehicle === 'motorcycle' ? '#ff00ff' : 
+                           currentVehicle === 'scooter' ? '#00ffff' : '#00ff00',
+                    width: 3,
+                    shape: 'spline',
+                    smoothing: 1.2
+                },
+                name: legendText
+            };
+
+            const layout = {
+                title: {
+                    text: 'CO₂ Emissions (kg/hour)',
+                    font: { color: '#fff', size: 14 }
+                },
+                plot_bgcolor: '#1a1a1a',
+                paper_bgcolor: '#1a1a1a',
+                xaxis: {
+                    title: 'Time (hours)',
+                    gridcolor: '#333',
+                    color: '#fff',
+                    tickfont: { size: 10 },
+                    range: [0, 10],
+                    dtick: 2
+                },
+                yaxis: {
+                    title: 'CO₂ (kg)',
+                    gridcolor: '#333',
+                    color: '#fff',
+                    tickfont: { size: 10 },
+                    range: [0, 500],
+                    dtick: 100
+                },
+                margin: { 
+                    l: 50,
+                    r: 150,
+                    t: 40,
+                    b: 40,
+                    pad: 4
+                },
+                showlegend: true,
+                legend: {
+                    x: 1.02,
+                    y: 0.98,
+                    xanchor: 'left',
+                    yanchor: 'top',
+                    font: { 
+                        color: '#fff',
+                        size: 11
+                    },
+                    bgcolor: 'rgba(0,0,0,0.5)',
+                    bordercolor: '#333',
+                    borderwidth: 1,
+                    orientation: 'v'
+                },
+                width: 550,
+                height: 270,
+                autosize: false
+            };
+
+            Plotly.newPlot('graph', [trace], layout);
+
+            const offset = calculateTreeOffset(maxEmission);
+            document.getElementById('emissionsInfo').innerHTML = 
+                `Peak: ${offset.peak} kg CO₂/hr | Annual: ${offset.annual.toLocaleString()} kg CO₂`;
+            document.getElementById('treesInfo').innerHTML = 
+                `🌳 Trees needed: ${offset.trees.fiveYear.toLocaleString()} (5yr) | ${offset.trees.tenYear.toLocaleString()} (10yr) | ${offset.trees.twentyYear.toLocaleString()} (20yr)`;
+        }
+
+        document.querySelectorAll('.control-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                this.parentElement.querySelectorAll('.control-btn')
+                    .forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+
+                if(this.dataset.traffic) currentTraffic = this.dataset.traffic;
+                if(this.dataset.weather) currentWeather = this.dataset.weather;
+                if(this.dataset.vehicle) currentVehicle = this.dataset.vehicle;
+
+                updateGraph();
             });
         });
+
+        updateGraph();
     </script>
 </body>
 </html>
