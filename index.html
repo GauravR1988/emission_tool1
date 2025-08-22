@@ -12,6 +12,7 @@
     .container {
       width: 650px; padding: 15px; background: #1a1a1a;
       border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      display: flex; flex-direction: column;
     }
     .controls { display: flex; justify-content: space-around; margin-bottom: 10px; gap: 5px; }
     .control-group {
@@ -35,6 +36,7 @@
     .info-panel {
       color: #00ff99; font-size: 13px; padding: 8px; background: rgba(0,0,0,0.3);
       border-radius: 5px; display: flex; justify-content: space-between; align-items: center;
+      margin-top: 8px;
     }
     .emissions-info { flex: 1; padding-right: 10px; }
     .trees-info { flex: 1; text-align: right; }
@@ -71,6 +73,7 @@
 
     <div id="graph"></div>
 
+    <!-- Tree Panel stays separate, always visible at the bottom -->
     <div class="info-panel">
       <div class="emissions-info" id="emissionsInfo"></div>
       <div class="trees-info" id="treesInfo"></div>
@@ -130,7 +133,6 @@
       const yValues = xValues.map(calculateEmissions);
       const maxEmission = Math.max(...yValues);
 
-      // stack lines in the legend item
       const legendText = [
         `Traffic: ${currentTraffic}`,
         `Weather: ${currentWeather}`,
@@ -163,12 +165,12 @@
           title: 'CO₂ (kg)', gridcolor: '#333', color: '#fff',
           tickfont: { size: 10 }, range: [0, 500], dtick: 100
         },
-        margin: { l: 60, r: 180, t: 50, b: 60 }, // space on right for side legend
+        margin: { l: 60, r: 180, t: 50, b: 120 }, // big bottom margin for tree panel
         showlegend: true,
         legend: {
-          orientation: 'v',   // vertical list
-          x: 1.02,            // push to the right side
-          y: 1,               // align to top
+          orientation: 'v',
+          x: 1.02,
+          y: 1,
           xanchor: 'left',
           yanchor: 'top',
           font: { color: '#fff', size: 12 },
@@ -177,7 +179,7 @@
           borderwidth: 1
         },
         width: 650,
-        height: 360,
+        height: 280,
         autosize: false
       };
 
