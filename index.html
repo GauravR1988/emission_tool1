@@ -30,45 +30,6 @@
             margin-bottom: 10px;
             gap: 5px;
         }
-        .control-group {
-            background: linear-gradient(145deg, #2a2a2a, #333);
-            padding: 8px;
-            border-radius: 8px;
-            box-shadow: inset 0 0 10px rgba(255,255,255,0.1);  /* Fixed */
-            flex: 1;
-        }
-        
-        .control-label {
-            color: #fff;
-            font-size: 12px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            text-shadow: 0 0 5px rgba(255,255,255,0.3);  /* Fixed */
-        }
-        
-        .control-btn {
-            padding: 4px 8px;
-            border: none;
-            border-radius: 4px;
-            background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
-            color: #fff;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            flex: 1;
-            font-size: 11px;
-            box-shadow: 
-                inset 0 0 5px rgba(255,255,255,0.1),  /* Fixed */
-                0 2px 5px rgba(0,0,0,0.2);
-        }
-        
-        .control-btn.active {
-            background: linear-gradient(145deg, #4a4a4a, #3a3a3a);
-            box-shadow: 
-                inset 0 0 10px rgba(255,255,255,0.2),
-                0 0 15px rgba(255,255,255,0.1);  /* Fixed */
-            transform: scale(1.05);
-        }
-
 
         .control-group {
             background: linear-gradient(145deg, #2a2a2a, #333);
@@ -130,6 +91,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-top: 5px;
+            width: calc(100% - 16px);
         }
 
         .emissions-info {
@@ -211,26 +174,16 @@
             const CO2_PER_TREE_PER_YEAR = 22; // kg CO2 per tree per year
             const OPERATION_HOURS_PER_DAY = 8;
             const OPERATION_DAYS_PER_YEAR = 260; // Working days only
-
-            // Calculate lifetime CO2 for each period
+            
             const annualCO2 = maxEmission * OPERATION_HOURS_PER_DAY * OPERATION_DAYS_PER_YEAR;
-            const fiveYearTotal = annualCO2 * 5;    // Total CO2 over 5 years
-            const tenYearTotal = annualCO2 * 10;    // Total CO2 over 10 years
-            const twentyYearTotal = annualCO2 * 20;  // Total CO2 over 20 years
-
-            // Calculate trees needed for the total CO2 in each period
-            const treesFor5Years = Math.ceil(fiveYearTotal / (CO2_PER_TREE_PER_YEAR * 5));
-            const treesFor10Years = Math.ceil(tenYearTotal / (CO2_PER_TREE_PER_YEAR * 10));
-            const treesFor20Years = Math.ceil(twentyYearTotal / (CO2_PER_TREE_PER_YEAR * 20));
+            
+            const treesFor5Years = Math.ceil(annualCO2 / CO2_PER_TREE_PER_YEAR);
+            const treesFor10Years = Math.ceil(annualCO2 / (CO2_PER_TREE_PER_YEAR * 2));
+            const treesFor20Years = Math.ceil(annualCO2 / (CO2_PER_TREE_PER_YEAR * 4));
 
             return {
                 peak: maxEmission.toFixed(1),
                 annual: Math.round(annualCO2),
-                totalCO2: {
-                    fiveYear: Math.round(fiveYearTotal),
-                    tenYear: Math.round(tenYearTotal),
-                    twentyYear: Math.round(twentyYearTotal)
-                },
                 trees: {
                     fiveYear: treesFor5Years,
                     tenYear: treesFor10Years,
@@ -244,7 +197,6 @@
             const yValues = xValues.map(x => calculateEmissions(x));
             const maxEmission = Math.max(...yValues);
 
-            // Create vertical legend text
             const legendText = [
                 `Traffic: ${currentTraffic.charAt(0).toUpperCase() + currentTraffic.slice(1)}`,
                 `Weather: ${currentWeather.charAt(0).toUpperCase() + currentWeather.slice(1)}`,
@@ -319,9 +271,9 @@
 
             const offset = calculateTreeOffset(maxEmission);
             document.getElementById('emissionsInfo').innerHTML = 
-                `Peak: ${offset.peak} kg CO₂/hr | Annual: ${offset.annual.toLocaleString()} kg CO₂`;
+                `Peak: ${offset.peak} kg CO₂/hr | Annual: ${offset.annual} kg CO₂`;
             document.getElementById('treesInfo').innerHTML = 
-                `🌳 Trees needed: ${offset.trees.fiveYear.toLocaleString()} (5yr) | ${offset.trees.tenYear.toLocaleString()} (10yr) | ${offset.trees.twentyYear.toLocaleString()} (20yr)`;
+                `🌳 ${offset.trees.fiveYear} trees (5yr) | ${offset.trees.tenYear} trees (10yr) | ${offset.trees.twentyYear} trees (20yr)`;
         }
 
         document.querySelectorAll('.control-btn').forEach(button => {
