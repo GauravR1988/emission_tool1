@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>CO₂ Emissions Play Tool</title>
+    <title>CO2 Emissions Play Tool</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         body {
@@ -17,7 +17,6 @@
 
         .container {
             width: 550px;
-            height: auto; /* auto instead of fixed */
             padding: 15px;
             background: #1a1a1a;
             border-radius: 10px;
@@ -76,10 +75,10 @@
         }
 
         #graph {
-            height: 180px; /* reduce to leave space */
+            height: 180px;
             background: #1a1a1a;
             border-radius: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
         .info-panel {
@@ -91,6 +90,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-top: 10px;
+            width: calc(100% - 16px);
         }
 
         .emissions-info {
@@ -168,21 +169,24 @@
             return baseEmission * (trafficEffect/5) * (weatherEffect/5);
         }
 
-        function calculateTreeOffset(yValues) {
+        function calculateTreeOffset(maxEmission) {
             const CO2_PER_TREE_PER_YEAR = 22; // kg CO2 per tree per year
             const OPERATION_HOURS_PER_DAY = 8;
-            const OPERATION_DAYS_PER_YEAR = 260;
-
-            const avgEmission = yValues.reduce((a,b) => a+b, 0) / yValues.length;
-            const annualCO2 = avgEmission * OPERATION_HOURS_PER_DAY * OPERATION_DAYS_PER_YEAR;
+            const OPERATION_DAYS_PER_YEAR = 260; // Working days only
+            
+            const annualCO2 = maxEmission * OPERATION_HOURS_PER_DAY * OPERATION_DAYS_PER_YEAR;
+            
+            const treesFor5Years = Math.ceil(annualCO2 / CO2_PER_TREE_PER_YEAR);
+            const treesFor10Years = Math.ceil(annualCO2 / (CO2_PER_TREE_PER_YEAR * 2));
+            const treesFor20Years = Math.ceil(annualCO2 / (CO2_PER_TREE_PER_YEAR * 4));
 
             return {
-                peak: Math.max(...yValues).toFixed(1),
+                peak: maxEmission.toFixed(1),
                 annual: Math.round(annualCO2),
                 trees: {
-                    fiveYear: Math.ceil(annualCO2 / CO2_PER_TREE_PER_YEAR),
-                    tenYear: Math.ceil(annualCO2 / (CO2_PER_TREE_PER_YEAR * 10)),
-                    twentyYear: Math.ceil(annualCO2 / (CO2_PER_TREE_PER_YEAR * 20))
+                    fiveYear: treesFor5Years,
+                    tenYear: treesFor10Years,
+                    twentyYear: treesFor20Years
                 }
             };
         }
@@ -190,6 +194,9 @@
         function updateGraph() {
             const xValues = Array.from({length: 101}, (_, i) => i/10);
             const yValues = xValues.map(x => calculateEmissions(x));
+            const maxEmission = Math.max(...yValues);
+
+            const legendText = `Traffic: ${currentTraffic}, Weather: ${currentWeather}, Vehicle: ${currentVehicle}`;
 
             const trace = {
                 x: xValues,
@@ -202,7 +209,7 @@
                     shape: 'spline',
                     smoothing: 1.2
                 },
-                name: `Traffic: ${currentTraffic}, Weather: ${currentWeather}, Vehicle: ${currentVehicle}`
+                name: legendText
             };
 
             const layout = {
@@ -230,31 +237,30 @@
                 },
                 margin: { 
                     l: 50,
-                    r: 150,
+                    r: 40,
                     t: 40,
-                    b: 40,
+                    b: 100, // more bottom margin
                     pad: 4
                 },
                 showlegend: true,
                 legend: {
-                    x: 1.02,
-                    y: 0.98,
-                    xanchor: 'left',
-                    yanchor: 'top',
+                    orientation: 'h',
+                    y: -0.3,   // move legend below chart
+                    x: 0.5,
+                    xanchor: 'center',
                     font: { color: '#fff', size: 11 },
                     bgcolor: 'rgba(0,0,0,0.5)',
                     bordercolor: '#333',
-                    borderwidth: 1,
-                    orientation: 'v'
+                    borderwidth: 1
                 },
                 width: 550,
-                height: 180,
+                height: 200,
                 autosize: false
             };
 
             Plotly.newPlot('graph', [trace], layout);
 
-            const offset = calculateTreeOffset(yValues);
+            const offset = calculateTreeOffset(maxEmission);
             document.getElementById('emissionsInfo').innerHTML = 
                 `Peak: ${offset.peak} kg CO₂/hr | Annual: ${offset.annual} kg CO₂`;
             document.getElementById('treesInfo').innerHTML = 
