@@ -16,7 +16,8 @@
         }
 
         .container {
-            width: 550px;
+            width: 600px;
+            height: auto;
             padding: 15px;
             background: #1a1a1a;
             border-radius: 10px;
@@ -75,22 +76,22 @@
         }
 
         #graph {
-            height: 180px;
+            height: 260px;
             background: #1a1a1a;
             border-radius: 8px;
             margin-bottom: 5px;
         }
 
         .info-panel {
-            color: #00ff99;
-            font-size: 13px;
+            color: #00ff00;
+            font-size: 11px;
             padding: 8px;
             background: rgba(0,0,0,0.3);
             border-radius: 5px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 10px;
+            margin-top: 5px;
             width: calc(100% - 16px);
         }
 
@@ -172,7 +173,7 @@
         function calculateTreeOffset(maxEmission) {
             const CO2_PER_TREE_PER_YEAR = 22; // kg CO2 per tree per year
             const OPERATION_HOURS_PER_DAY = 8;
-            const OPERATION_DAYS_PER_YEAR = 260; // Working days only
+            const OPERATION_DAYS_PER_YEAR = 260;
             
             const annualCO2 = maxEmission * OPERATION_HOURS_PER_DAY * OPERATION_DAYS_PER_YEAR;
             
@@ -239,22 +240,22 @@
                     l: 50,
                     r: 40,
                     t: 40,
-                    b: 100, // more bottom margin
-                    pad: 4
+                    b: 180   // reserve space for legend
                 },
                 showlegend: true,
                 legend: {
                     orientation: 'h',
-                    y: -0.3,   // move legend below chart
                     x: 0.5,
                     xanchor: 'center',
+                    y: -0.5,   // push below chart
+                    yanchor: 'top',
                     font: { color: '#fff', size: 11 },
                     bgcolor: 'rgba(0,0,0,0.5)',
                     bordercolor: '#333',
                     borderwidth: 1
                 },
-                width: 550,
-                height: 200,
+                width: 600,
+                height: 350,
                 autosize: false
             };
 
